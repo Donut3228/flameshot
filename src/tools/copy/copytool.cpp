@@ -48,6 +48,20 @@ CaptureTool* CopyTool::copy(QObject *parent) {
 }
 
 void CopyTool::pressed(const CaptureContext &context) {
-    emit requestAction(REQ_CAPTURE_DONE_OK);
-    ScreenshotSaver().saveToClipboard(context.selectedScreenshotArea());
+    if (context.savePath.isEmpty()) {
+        emit requestAction(REQ_HIDE_GUI);
+        bool ok = ScreenshotSaver().saveToFilesystemGUI(
+                    context.selectedScreenshotArea());
+        if (ok) {
+            emit requestAction(REQ_CAPTURE_DONE_OK);
+        }
+        ScreenshotSaver().saveToClipboard(context.selectedScreenshotArea());
+    } else {
+        bool ok = ScreenshotSaver().saveToFilesystem(
+                    context.selectedScreenshotArea(), context.savePath);
+        if (ok) {
+            emit requestAction(REQ_CAPTURE_DONE_OK);
+        }
+        ScreenshotSaver().saveToClipboard(context.selectedScreenshotArea());
+    }
 }
